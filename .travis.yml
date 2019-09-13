@@ -1,0 +1,17 @@
+sudo: required
+
+language: bash
+
+services:
+  - docker
+
+before_script:
+  - git clone https://github.com/Aidbox/devbox.git
+  - wget https://github.com/Aidbox/stresty/releases/download/0.0.9/stresty.jar
+  - docker-compose up -d
+
+script:
+  - AIDBOX_URL=http://localhost:8888/ AIDBOX_AUTH_TYPE=Basic AIDBOX_CLIENT_ID=root AIDBOX_CLIENT_SECRET=secret java -jar stresty.jar *.yaml
+  
+after_script:
+  - docker-compose stop
