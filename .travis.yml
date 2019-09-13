@@ -7,6 +7,8 @@ services:
 
 before_script:
   - git clone https://github.com/Aidbox/devbox.git
+  - mv .env /devbox/.env
+  - cp -R /test /devbox/test
   - cd devbox
   - wget https://github.com/Aidbox/stresty/releases/download/0.0.9/stresty.jar
   - docker-compose up -d
