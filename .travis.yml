@@ -14,7 +14,13 @@ install:
   - docker-compose up -d
 
 before_script:
-  - curl http://localhost:8888/
+  - |
+    curl --connect-timeout 5 \
+         --max-time 10 \
+         --retry 5 \
+         --retry-delay 0 \
+         --retry-max-time 20 \
+         http://localhost:8888/
 
 script:
   - AIDBOX_URL=http://localhost:8888/ AIDBOX_AUTH_TYPE=Basic AIDBOX_CLIENT_ID=root AIDBOX_CLIENT_SECRET=secret java -jar stresty.jar test/*.yaml
