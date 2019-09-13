@@ -50,16 +50,17 @@ steps:
     name: [{given: ['Vlad'], family: 'Ganshin'}]
     ups: extra
   match:
-    status: 400
+    status: 422
     body:
       issue:
-      - expression: '.ups'
-        error: string?
+      - expression: 'Patient.ups'
+        diagnostics: string?
 - id: delete
   DELETE: /Patient/pt-1
   match:
     status: 200
+
 - id: read-404
   GET: /Patient/pt-1
   match:
-    status: 404
+    status: 4xx?
