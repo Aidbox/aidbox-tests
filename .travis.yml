@@ -13,7 +13,8 @@ install:
   - mv .env devbox/.env
   - mv test devbox/test
   - cd devbox
-  - echo "AIDBOX_LICENSE_ID=$AIDBOX_LICENSE_ID\nAIDBOX_LICENSE_KEY=$AIDBOX_LICENSE_KEY" >> ".env"
+  - echo "AIDBOX_LICENSE_ID=$AIDBOX_LICENSE_ID" >> ".env"
+  - echo "AIDBOX_LICENSE_KEY=$AIDBOX_LICENSE_KEY" >> ".env"
   - wget https://github.com/Aidbox/stresty/releases/download/0.0.11/stresty.jar
   - docker-compose up -d
 
