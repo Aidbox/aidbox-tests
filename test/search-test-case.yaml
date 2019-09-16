@@ -214,7 +214,7 @@ steps:
         resourceType: "Patient"
         id: "pt-3"
   match:
-    status: 200
+    status: ok?
 
 - id: get-patients-from-list
   GET: /Patient?_list=list-3

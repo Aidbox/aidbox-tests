@@ -14,7 +14,7 @@ install:
   - mv .env devbox/.env
   - mv test devbox/test
   - cd devbox
-  - wget https://github.com/Aidbox/stresty/releases/download/0.0.9/stresty.jar
+  - wget https://github.com/Aidbox/stresty/releases/download/0.0.11/stresty.jar
   - docker-compose up -d
 
 before_script:
