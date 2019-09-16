@@ -1,20 +1,38 @@
 id: search-query
 desc: |
-  See https://docs.aidbox.app/basic-concepts/search-1/searchquery
+  With SearchQuery resource you can define "managed"  SQL for Search API with parameters, paging, sorting and includes.
 
+  See https://docs.aidbox.app/basic-concepts/search-1/searchquery
 
 steps:
 - id: clean
-  desc: Clear all patients
+  desc: |
+    Clear all patients.
   POST: /$sql
-  body: 'TRUNCATE patient'
+  body: |
+    truncate patient;
+    truncate encounter;
+    truncate organization;
   match:
     status: 200
 
 - id: prerequisites
-  desc: Upload patients
+  desc: |
+    Upload patients, encounters & organizations.
   PUT: /
   body:
+
+  - id: org-1
+    resourceType: Organization
+    name: iBolit & Co.
+    type:
+    - text: Healtcare provider
+  - id: org-2
+    resourceType: Organization
+    name: Arkham Asylum
+    type:
+    - text: Healtcare provider
+
   - id: pt-1
     resourceType: Patient
     name: [{given: [Vlad], family: Ganshin}]
@@ -24,6 +42,10 @@ steps:
     text:
       status: additional
       div: Healthy Patient
+    managingOrganization:
+      id: org-1
+      resourceType: Organization
+
   - id: pt-2
     resourceType: Patient
     name: [{given: [Anna], family: Chu}]
@@ -33,6 +55,16 @@ steps:
     text:
       status: additional
       div: Unknown
+    managingOrganization:
+      id: org-1
+      resourceType: Organization
+  - id: enc-1
+    resourceType: Encounter
+    status: planned
+    subject:
+      id: pt-2
+      resourceType: Patient
+
   - id: pt-3
     resourceType: Patient
     name: [{given: [Ivan], family: Shilov}]
@@ -42,6 +74,10 @@ steps:
     text:
       status: additional
       div: In progress
+    managingOrganization:
+      id: org-2
+      resourceType: Organization
+
   - id: pt-4
     resourceType: Patient
     name: [{given: [Victor], family: Sidorov}]
@@ -51,6 +87,18 @@ steps:
     text:
       status: additional
       div: Old
+  - id: enc-2
+    resourceType: Encounter
+    status: finished
+    subject:
+      id: pt-4
+      resourceType: Patient
+  - id: enc-3
+    resourceType: Encounter
+    status: arrived
+    subject:
+      id: pt-4
+      resourceType: Patient
   match:
     status: 200
 
@@ -123,7 +171,7 @@ steps:
 
 - id: search-with-gender-and-family-params
   desc: |
-    Search all male patients with corresponding last name (family)
+    Search all male patients with corresponding last name (family).
   GET: "/alpha/Patient?query=q-1&gender=male&family=Ganshin"
   match:
     status: 200
@@ -135,3 +183,96 @@ steps:
           id: pt-1
           resourceType: Patient
       total: 1
+
+- id: create-search-for-encounter
+  desc: |
+    Create SearchQuery for encounter by patient's lastname 
+  PUT: /SearchQuery/q-2
+  body:
+    resource: {id: 'Encounter', resourceType: 'Entity'}
+    as: enc
+    query:
+      order-by: pt.id desc
+    params:
+      pt:
+        type: string
+        format: '% ?%'
+        join:
+          pt: 
+            table: patient
+            by: "enc.resource#>>'{subject,id}' = pt.id"
+        where: |
+          aidbox_text_search(knife_extract_text(pt.resource, $$[["name","family"]]$$)) 
+          ilike {{params.pt}}
+
+- id: search-encouters
+  desc: |
+    Search Sidorov's encounters.
+  GET: /alpha/Encounter?query=q-2&pt=Sidorov
+  match:
+    status: 200
+    body:
+      entry:
+      - resource:
+          id: enc-2
+      - resource:
+          id: enc-3
+
+- id: create-sq-with-includes
+  desc: |
+    Create SearchQuery for planned encounters with included Patient (subject) & Organization (organization).
+  PUT: /SearchQuery/q-3
+  body:
+    resourceType: SearchQuery
+    resource: {id: Encounter, resourceType: Entity}
+    as: enc
+    query:
+      where: "enc.resource->>'status' = 'planned'"
+      order-by: enc.id
+    total: true
+    includes:
+      # name for include
+      subject:
+        # path to reference
+        path: [subject]
+        # ref to resource
+        resource: {id: Patient, resourceType: Entity}
+        # nested includes
+        includes:
+          organization:
+            path: [managingOrganization]
+            resource: {id: Organization, resourceType: Entity}
+    limit: 40
+  match:
+    status: 200
+
+- id: use-sq
+  desc: |
+    Search planned encounters.
+  GET: /alpha/Encounter?query=q-3
+  match:
+    status: 200
+    body:
+      entry:
+      - resource:
+          id: enc-1
+          subject:
+            id: pt-2
+            resourceType: Patient
+      - resource:
+          id: pt-2
+          resourceType: Patient
+      - resource:
+          id: org-1
+          resourceType: Organization
+
+- id: explain-analyze
+  desc: |
+    Used to analyze combined sql.
+  GET: "/alpha/Encounter?query=q-2&pt=Sid&_explain=analyze"
+  match:
+    status: 200
+    body:
+      query: "#^EXPLAIN ANALYZE"
+      explain: "#Planing Time: |Execution Time: "
+      params: ["% Sid%"]
