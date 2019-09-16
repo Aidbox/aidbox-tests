@@ -6,15 +6,16 @@ services:
   - docker
 
 env:
-  - AIDBOX_LICENSE_ID="a556ac913e89449" AIDBOX_LICENSE_KEY="fb5525d7e8254439acd62b3faae91be9"
+  global:
+    - AIDBOX_LICENSE_ID="a556ac913e89449" AIDBOX_LICENSE_KEY="fb5525d7e8254439acd62b3faae91be9"
 
 install:
   - git clone https://github.com/Aidbox/devbox.git
   - mv .env devbox/.env
   - mv test devbox/test
   - cd devbox
-  - echo "AIDBOX_LICENSE_ID=$AIDBOX_LICENSE_ID" >> ".env"
-  - echo "AIDBOX_LICENSE_KEY=$AIDBOX_LICENSE_KEY" >> ".env"
+  #- echo "AIDBOX_LICENSE_ID=$AIDBOX_LICENSE_ID" >> ".env"
+  #- echo "AIDBOX_LICENSE_KEY=$AIDBOX_LICENSE_KEY" >> ".env"
   - wget https://github.com/Aidbox/stresty/releases/download/0.0.11/stresty.jar
   - docker-compose up -d
 
