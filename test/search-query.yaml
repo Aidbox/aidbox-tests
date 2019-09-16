@@ -11,7 +11,8 @@ steps:
   match:
     status: 200
 
-- id: upload-patients
+- id: prerequisites
+  desc: Upload patients
   PUT: /
   body:
   - id: pt-1
@@ -54,8 +55,12 @@ steps:
     status: 200
 
 - id: create-search-query
+  desc: |
+    Create SearchQuery resource to look for young Patients
+    and with such params as gender and family.
   PUT: /SearchQuery/q-1
   body:
+    # attach this query to Patient resource type
     resource: {id: 'Patient', resourceType: 'Entity'}
     # give alias to patient table
     as: pt
@@ -76,22 +81,10 @@ steps:
           aidbox_text_search(knife_extract_text(pt.resource, $$[["name","family"]]$$)) ilike {{params.family}}
   match:
     status: ok?
-    body:
-      as: pt
-      query: {where: '(pt.resource->>''birthDate'')::date > ''1994-01-01''', order-by: pt.id desc}
-      total: true
-      params:
-        family:
-          type: string
-          where: |
-            aidbox_text_search(knife_extract_text(pt.resource, $$[["name","family"]]$$)) ilike {{params.family}}
-          format: '%?%'
-        gender: {type: string, where: 'pt.resource->>''gender'' = {{params.gender}}'}
-      resource: {id: Patient, resourceType: Entity}
-      id: q-1
-      resourceType: SearchQuery
 
-- id: search-against-search-query-without-additional-params
+- id: search-without-additional-params
+  desc: |
+    Search all young patients.
   GET: /alpha/Patient?query=q-1
   match:
     status: 200
@@ -110,7 +103,9 @@ steps:
           resourceType: Patient
       total: 3
 
-- id: search-against-search-query-with-gender-param
+- id: search-with-gender-param
+  desc: |
+    Search all male young patients.
   GET: "/alpha/Patient?query=q-1&gender=male"
   match:
     status: 200
@@ -126,7 +121,9 @@ steps:
           resourceType: Patient
       total: 2
 
-- id: search-against-search-query-with-gender-family-params
+- id: search-with-gender-and-family-params
+  desc: |
+    Search all male patients with corresponding last name (family)
   GET: "/alpha/Patient?query=q-1&gender=male&family=Ganshin"
   match:
     status: 200
