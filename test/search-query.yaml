@@ -90,7 +90,7 @@ steps:
     status: 200
     body:
       resourceType: Bundle
-      type: searchset
+      type: search-result
       entry:
       - resource:
           id: pt-3
@@ -111,7 +111,7 @@ steps:
     status: 200
     body:
       resourceType: Bundle
-      type: searchset
+      type: search-result
       entry:
       - resource:
           id: pt-3
@@ -129,7 +129,7 @@ steps:
     status: 200
     body:
       resourceType: Bundle
-      type: searchset
+      type: search-result
       entry:
       - resource:
           id: pt-1
