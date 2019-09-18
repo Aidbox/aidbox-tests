@@ -382,3 +382,35 @@ steps:
             - item:
                 resourceType: "Patient"
                 id: "pt-3"
+
+- id: get-resource-with-a-given-id-and-other-reffering-to-it
+  GET: /Patient?_id=pt-2&_revinclude=List:subject
+  match:
+    status: 200
+    body:
+      entry:
+        - resource:
+            id: list-3
+            resourceType: List
+            status: "Generated"
+            mode: "changes"
+            subject: 
+              resourceType: "Patient"
+              id: "pt-2"
+            entry:
+            - item:
+                resourceType: "Patient"
+                id: "pt-1"
+            - item:
+                resourceType: "Patient"
+                id: "pt-3"
+        - resource:
+            id: pt-2
+            resourceType: Patient
+            name: [given: [Anna]]
+            birthDate: '1994-08-07'
+            address: [{city: Kolpino}]
+            text:
+              status: additional
+              div: Unknown
+
