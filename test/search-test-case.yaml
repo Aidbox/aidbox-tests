@@ -214,7 +214,7 @@ steps:
         resourceType: "Patient"
         id: "pt-3"
   match:
-    status: ok?
+    status: 2xx?
 
 - id: get-patients-from-list
   GET: /Patient?_list=list-3
@@ -481,3 +481,52 @@ steps:
               status: additional
               div: Unknown
 
+# https://docs.aidbox.app/basic-concepts/search-1/_result
+
+- id: get-patient's-ids-in-array
+  GET: /Patient?_elements=id&_result=array
+  match:
+    status: 200
+    body:
+      - id: pt-1
+        resourceType: Patient
+      - id: pt-2
+        resourceType: Patient
+      - id: pt-3
+        resourceType: Patient
+
+# https://docs.aidbox.app/basic-concepts/search-1/_explain
+
+- id: get-search-query-explained
+  GET: /Patient?_explain=analyze
+  match:
+    status: 200
+    body:
+      query: ['SELECT "patient".* FROM "patient" LIMIT ? OFFSET ? ', 100, 0]
+
+# https://docs.aidbox.app/basic-concepts/search-1/usdlookup
+
+- id: lookup-for-resources-by-key-attributes
+  GET: /Patient/$lookup?by=birthDate&sort=name.given&q=19&count=50&limit=200
+  mathch:
+    status: 200
+    body:
+      entry:
+        - resource:
+            id: pt-2
+            resourceType: Patient
+            name: [given: [Anna]]
+            birthDate: '1994-08-07'
+            address: [{city: Kolpino}]
+            text:
+              status: additional
+              div: Unknown
+        - resource:
+            id: pt-1
+            resourceType: Patient
+            name: [{given: [Vlad], family: Ganshin}]
+            birthDate: '1994-09-26'
+            address: [{city: St. Petersburg}]
+            text:
+              status: additional
+              div: Healthy Patient
