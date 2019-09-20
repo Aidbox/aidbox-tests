@@ -128,7 +128,7 @@ steps:
         where: |
           aidbox_text_search(knife_extract_text(pt.resource, $$[["name","family"]]$$)) ilike {{params.family}}
   match:
-    status: ok?
+    status: 2xx?
 
 - id: search-without-additional-params
   desc: |
