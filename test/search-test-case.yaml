@@ -414,3 +414,43 @@ steps:
               status: additional
               div: Unknown
 
+# https://docs.aidbox.app/basic-concepts/search-1/chained-parameters
+
+- id: get-recources-filtered-by-nested-fields
+  GET: /List?subject:Patient.name=Anna
+  match:
+    status: 200
+    body:
+      entry:
+        - resource:
+            id: list-3
+            resourceType: List
+            status: "Generated"
+            mode: "changes"
+            subject: 
+              resourceType: "Patient"
+              id: "pt-2"
+            entry:
+            - item:
+                resourceType: "Patient"
+                id: "pt-1"
+            - item:
+                resourceType: "Patient"
+                id: "pt-3"
+
+- id: get-patient-for-which-list-has-given-id-and-refer-to-the-patient-through-subject-field
+  GET: /Patient?_has:List:subject:_id=list-3
+  match:
+    status: 200
+    body:
+      entry:
+        - resource:
+            id: pt-2
+            resourceType: Patient
+            name: [given: [Anna]]
+            birthDate: '1994-08-07'
+            address: [{city: Kolpino}]
+            text:
+              status: additional
+              div: Unknown
+
