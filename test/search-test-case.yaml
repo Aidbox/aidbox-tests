@@ -454,3 +454,30 @@ steps:
               status: additional
               div: Unknown
 
+# https://docs.aidbox.app/basic-concepts/search-1/.-expressions
+
+- id: get-patients-born-in-1990s
+  GET: /Patient?.birthDate$contains=199
+  match: 
+    status: 200
+    body:
+      entry:
+        - resource:
+            id: pt-1
+            resourceType: Patient
+            name: [{given: [Vlad], family: Ganshin}]
+            birthDate: '1994-09-26'
+            address: [{city: St. Petersburg}]
+            text:
+              status: additional
+              div: Healthy Patient
+        - resource:
+            id: pt-2
+            resourceType: Patient
+            name: [given: [Anna]]
+            birthDate: '1994-08-07'
+            address: [{city: Kolpino}]
+            text:
+              status: additional
+              div: Unknown
+
